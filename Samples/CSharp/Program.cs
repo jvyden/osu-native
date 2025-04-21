@@ -11,3 +11,6 @@ using LazerBeatmap map = lazer.LoadDifficultyFromFile(new FileInfo(beatmap));
 double sr = lazer.ComputeDifficulty(map, ruleset, mods);
 
 Console.WriteLine(sr);
+
+Console.WriteLine("Strain:");
+lazer.ComputeStrain(map, ruleset);

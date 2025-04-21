@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,8 @@ using System.Runtime.InteropServices;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Difficulty;
+using osu.Game.Rulesets.Difficulty.Skills;
 using osu.Game.Rulesets.Mods;
 
 namespace osu.Native
@@ -30,7 +33,7 @@ namespace osu.Native
         }
 
         /// <summary>
-        /// Computes difficulty given beatmap.
+        /// Computes difficulty given a beatmap.
         /// </summary>
         /// <param name="beatmapHandle">The handle of the beatmap.</param>
         /// <param name="rulesetId">The ruleset.</param>
@@ -44,6 +47,21 @@ namespace osu.Native
                 return ErrorCode.BadBeatmapHandle;
             
             return ComputeDifficulty(beatmap, rulesetId, mods, starRating);
+        }
+        
+        /// <summary>
+        /// Computes strain given a beatmap.
+        /// </summary>
+        /// <param name="beatmapHandle">The handle of the beatmap.</param>
+        /// <param name="rulesetId">The ruleset.</param>
+        [UnmanagedCallersOnly(EntryPoint = "ComputeStrain", CallConvs = [typeof(CallConvCdecl)])]
+        public static ErrorCode ComputeStrain(int beatmapHandle, int rulesetId)
+        {
+            WorkingBeatmap? beatmap = Handles.Get(beatmapHandle);
+            if (beatmap == null)
+                return ErrorCode.BadBeatmapHandle;
+
+            return ComputeStrain(beatmap, rulesetId);
         }
         
         /// <summary>
@@ -132,24 +150,34 @@ namespace osu.Native
                 return Error(ErrorCode.Failure, ex.ToString());
             }
         }
+        
+        private static ErrorCode ComputeStrain(WorkingBeatmap workingBeatmap, int rulesetId)
+        {
+            try
+            {
+                Ruleset ruleset = RulesetHelper.CreateRuleset(rulesetId);
 
-        // private static ErrorCode ComputeStrain(WorkingBeatmap workingBeatmap, int rulesetId, uint mods)
-        // {
-        //     try
-        //     {
-        //         Ruleset ruleset = RulesetHelper.CreateRuleset(rulesetId);
-        //         Mod[] rulesetMods = ruleset.ConvertFromLegacyMods((LegacyMods)mods).ToArray();
-        //
-        //         ruleset.CreateDifficultyCalculator(workingBeatmap)
-        //             
-        //
-        //         return ErrorCode.Success;
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return Error(ErrorCode.Failure, ex.ToString());
-        //     }
-        // }
+                DifficultyCalculator calculator = ruleset.CreateDifficultyCalculator(workingBeatmap);
+                if (calculator is not IStrainCalculator strainCalculator)
+                    return ErrorCode.InvalidRuleset;
+
+                Dictionary<StrainSkill, List<double>> strain = strainCalculator.CalculateStrain();
+                foreach (KeyValuePair<StrainSkill, List<double>> kvp in strain)
+                {
+                    Console.WriteLine(kvp.Key.GetType().Name);
+                    foreach (double d in kvp.Value)
+                    {
+                        Console.WriteLine(d);
+                    }
+                }
+        
+                return ErrorCode.Success;
+            }
+            catch (Exception ex)
+            {
+                return Error(ErrorCode.Failure, ex.ToString());
+            }
+        }
 
         private static ErrorCode Error(ErrorCode code, string description)
         {

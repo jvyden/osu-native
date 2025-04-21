@@ -49,5 +49,12 @@ namespace osu.Native.Bindings
 
             return starRating;
         }
+        
+        public void ComputeStrain(LazerBeatmap beatmap, int rulesetId)
+        {
+            ErrorCode code = Native.ComputeStrain(beatmap.Handle, rulesetId);
+            if (code != ErrorCode.Success)
+                throw new LazerNativeException(code);
+        }
     }
 }

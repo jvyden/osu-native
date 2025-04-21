@@ -9,5 +9,6 @@ public enum ErrorCode : byte
     EmptyBeatmap = 1,
     FileReadError = 2,
     BadBeatmapHandle = 3,
+    InvalidRuleset = 4,
     Failure = 255
 }

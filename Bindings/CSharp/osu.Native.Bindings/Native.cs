@@ -25,6 +25,9 @@ namespace osu.Native.Bindings
         
         [DllImport(lib_name, EntryPoint = "ComputeDifficulty")]
         public static extern ErrorCode ComputeDifficulty(int beatmapHandle, int rulesetId, uint mods, out double starRating);
+        
+        [DllImport(lib_name, EntryPoint = "ComputeStrain")]
+        public static extern ErrorCode ComputeStrain(int beatmapHandle, int rulesetId);
 
         [DllImport(lib_name, EntryPoint = "SetLogger")]
         public static extern ErrorCode SetLogger(IntPtr logger);
