@@ -82,6 +82,7 @@
                           $(GameDir)/Skinning/GlobalSkinColours.cs;
                           $(GameDir)/Online/API/Requests/Responses/APIBeatmap.cs;
                           $(GameDir)/Online/API/Requests/Responses/APIBeatmapSet.cs;
+                          $(GameDir)/Online/API/Requests/Responses/APITag.cs;
                           $(GameDir)/Online/Rooms/RoomCategory.cs;
                           $(GameDir)/Online/Rooms/RoomStatus.cs;
                           $(GameDir)/Online/EndpointConfiguration.cs;
@@ -90,6 +91,7 @@
                           $(GameDir)/Scoring/ScoreInfoExtensions.cs;
                           $(GameDir)/Scoring/Legacy/ScoreInfoExtensions.cs;
                           $(GameDir)/Beatmaps/APIFailTimes.cs;
+                          $(GameDir)/Beatmaps/APIBeatmapTag.cs;
                           $(GameDir)/Localisation/SongSelectStrings.cs;
                           $(GameDir)/IO/LineBufferedReader.cs;
                           $(GameDir)/Users/IUser.cs;"
@@ -113,6 +115,7 @@
                           $(GameDir)/Rulesets/Mods/ModBarrelRoll.cs;
                           $(GameDir)/Beatmaps/Formats/LegacyStoryboardDecoder.cs;
                           $(GameDir)/Beatmaps/Formats/JsonBeatmapDecoder.cs;
+                          $(GameDir)/Extensions/ModelExtensions.cs;
                           $(GameDir)/Storyboards/Drawables/**/*.cs;"
 
                  Link="External/osu.Game/%(RecursiveDir)%(Filename)%(Extension)"/>

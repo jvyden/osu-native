@@ -25,7 +25,8 @@
                           $(ManiaRulesetDir)/ManiaSettingsSubsection.cs;
                           $(ManiaRulesetDir)/ManiaSkinComponentLookup.cs;
                           $(ManiaRulesetDir)/VariantMappingGenerator.cs;
-                          $(ManiaRulesetDir)/SingleStageVariantGenerator.cs;"
+                          $(ManiaRulesetDir)/SingleStageVariantGenerator.cs;
+                          $(ManiaRulesetDir)/ManiaMobileLayout.cs"
 
                  Link="External/osu.Game.Rulesets.Mania/%(RecursiveDir)%(Filename)%(Extension)"/>
 

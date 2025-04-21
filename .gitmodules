@@ -1,6 +1,7 @@
 [submodule "External/osu"]
 	path = External/osu
-	url = https://github.com/ppy/osu
+	url = git@github.com:jvyden/osu.git
+	branch = expose-strain
 [submodule "External/osu-framework"]
 	path = External/osu-framework
 	url = https://github.com/ppy/osu-framework
