@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace osu.Native.Bindings
@@ -22,6 +23,31 @@ namespace osu.Native.Bindings
             Log?.Invoke(Marshal.PtrToStringUni((IntPtr)message));
         }
 
-        public IDifficultyCalculator CreateDifficultyCalculator() => new DifficultyCalculator();
+        public LazerBeatmap LoadDifficultyFromFile(FileInfo file)
+        {
+            ErrorCode code = Native.LoadBeatmapFromFile(file.FullName, out int beatmapHandle);
+            if (code != ErrorCode.Success)
+                throw new LazerNativeException(code);
+
+            return new LazerBeatmap(beatmapHandle);
+        }
+        
+        public LazerBeatmap LoadDifficultyFromText(string beatmapData)
+        {
+            ErrorCode code = Native.LoadBeatmapFromText(beatmapData, out int beatmapHandle);
+            if (code != ErrorCode.Success)
+                throw new LazerNativeException(code);
+
+            return new LazerBeatmap(beatmapHandle);
+        }
+
+        public double ComputeDifficulty(LazerBeatmap beatmap, int rulesetId, uint mods)
+        {
+            ErrorCode code = Native.ComputeDifficulty(beatmap.Handle, rulesetId, mods, out double starRating);
+            if (code != ErrorCode.Success)
+                throw new LazerNativeException(code);
+
+            return starRating;
+        }
     }
 }

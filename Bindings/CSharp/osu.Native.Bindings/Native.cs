@@ -14,14 +14,20 @@ namespace osu.Native.Bindings
         private const string lib_name = "osu.Native";
 #endif
 
-        [DllImport(lib_name, EntryPoint = "ComputeDifficulty_FromFile")]
-        public static extern int ComputeDifficultyFromFile([MarshalAs(UnmanagedType.LPStr)] string filePath, int rulesetId, uint mods, out double starRating);
+        [DllImport(lib_name, EntryPoint = "LoadBeatmap_FromText")]
+        public static extern ErrorCode LoadBeatmapFromText([MarshalAs(UnmanagedType.LPStr)] string beatmapData, out int beatmapHandle);
 
-        [DllImport(lib_name, EntryPoint = "ComputeDifficulty_FromText")]
-        public static extern int ComputeDifficultyFromText([MarshalAs(UnmanagedType.LPStr)] string filePath, int rulesetId, uint mods, out double starRating);
+        [DllImport(lib_name, EntryPoint = "LoadBeatmap_FromFile")]
+        public static extern ErrorCode LoadBeatmapFromFile([MarshalAs(UnmanagedType.LPStr)] string filePath, out int beatmapHandle);
+
+        [DllImport(lib_name, EntryPoint = "FreeBeatmap")]
+        public static extern ErrorCode FreeBeatmap(int beatmapHandle);
+        
+        [DllImport(lib_name, EntryPoint = "ComputeDifficulty")]
+        public static extern ErrorCode ComputeDifficulty(int beatmapHandle, int rulesetId, uint mods, out double starRating);
 
         [DllImport(lib_name, EntryPoint = "SetLogger")]
-        public static extern int SetLogger(IntPtr logger);
+        public static extern ErrorCode SetLogger(IntPtr logger);
 
         public unsafe delegate void LogDelegate(char* message);
     }
