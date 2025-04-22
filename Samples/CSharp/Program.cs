@@ -13,4 +13,13 @@ double sr = lazer.ComputeDifficulty(map, ruleset, mods);
 Console.WriteLine(sr);
 
 Console.WriteLine("Strain:");
-lazer.ComputeStrain(map, ruleset);
+Dictionary<string, double[]> strains = lazer.ComputeStrain(map, ruleset);
+foreach (KeyValuePair<string, double[]> keyValuePair in strains)
+{
+    Console.WriteLine(keyValuePair.Key);
+    foreach (double d in keyValuePair.Value)
+    {
+        Console.Write('\t');
+        Console.WriteLine(d);
+    }
+}

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Rulesets;
@@ -16,7 +17,7 @@ using osu.Game.Rulesets.Mods;
 
 namespace osu.Native
 {
-    public unsafe partial class Program
+    public static unsafe class Program
     {
         private static LogDelegate? _logger;
         private static readonly BeatmapHandleStore Handles = new();
@@ -48,20 +49,67 @@ namespace osu.Native
             
             return ComputeDifficulty(beatmap, rulesetId, mods, starRating);
         }
-        
+
         /// <summary>
         /// Computes strain given a beatmap.
         /// </summary>
         /// <param name="beatmapHandle">The handle of the beatmap.</param>
         /// <param name="rulesetId">The ruleset.</param>
+        /// <param name="entryPtr">A pointer to the first strain entry.</param>
+        /// <param name="entryCount">The number of strain entries.</param>
         [UnmanagedCallersOnly(EntryPoint = "ComputeStrain", CallConvs = [typeof(CallConvCdecl)])]
-        public static ErrorCode ComputeStrain(int beatmapHandle, int rulesetId)
+        public static ErrorCode ComputeStrain(int beatmapHandle, int rulesetId, StrainEntry** entryPtr, int* entryCount)
         {
             WorkingBeatmap? beatmap = Handles.Get(beatmapHandle);
             if (beatmap == null)
                 return ErrorCode.BadBeatmapHandle;
 
-            return ComputeStrain(beatmap, rulesetId);
+            ErrorCode code = ComputeStrain(beatmap, rulesetId, out Dictionary<StrainSkill, List<double>>? strain);
+            if (code != ErrorCode.Success || strain == null)
+                return code;
+
+            int total = strain.Count;
+            
+            StrainEntry* ourEntryPtr = (StrainEntry*)Marshal.AllocHGlobal(sizeof(StrainEntry) * total);
+
+            int i = 0;
+            foreach (KeyValuePair<StrainSkill, List<double>> kvp in strain)
+            {
+                string skillName = kvp.Key.GetType().Name;
+                double[] values = kvp.Value.ToArray();
+                
+                int valuesCount = values.Length;
+                IntPtr valuesPtr = Marshal.AllocHGlobal(sizeof(double) * valuesCount);
+                Marshal.Copy(values, 0, valuesPtr, valuesCount);
+
+                ourEntryPtr[i] = new StrainEntry
+                {
+                    SkillType = Marshal.StringToHGlobalUni(skillName),
+                    Values = valuesPtr,
+                    ValueCount = valuesCount
+                };
+                
+                i++;
+            }
+
+            *entryCount = total;
+            *entryPtr = ourEntryPtr;
+            return ErrorCode.Success;
+        }
+
+        /// <summary>
+        /// Frees strain entries allocated by <see cref="ComputeStrain"/>.
+        /// </summary>
+        [UnmanagedCallersOnly(EntryPoint = "FreeStrainEntries", CallConvs = [typeof(CallConvCdecl)])]
+        public static ErrorCode FreeStrainEntries(StrainEntry* entryPtr, int entryCount)
+        {
+            for (int i = 0; i < entryCount; i++)
+            {
+                Marshal.FreeHGlobal((IntPtr)entryPtr[i].SkillType);
+                Marshal.FreeHGlobal((IntPtr)entryPtr[i].Values);
+            }
+            Marshal.FreeHGlobal((IntPtr)entryPtr);
+            return ErrorCode.Success;
         }
         
         /// <summary>
@@ -151,8 +199,9 @@ namespace osu.Native
             }
         }
         
-        private static ErrorCode ComputeStrain(WorkingBeatmap workingBeatmap, int rulesetId)
+        private static ErrorCode ComputeStrain(WorkingBeatmap workingBeatmap, int rulesetId, out Dictionary<StrainSkill, List<double>>? strainValues)
         {
+            strainValues = null;
             try
             {
                 Ruleset ruleset = RulesetHelper.CreateRuleset(rulesetId);
@@ -162,15 +211,8 @@ namespace osu.Native
                     return ErrorCode.InvalidRuleset;
 
                 Dictionary<StrainSkill, List<double>> strain = strainCalculator.CalculateStrain();
-                foreach (KeyValuePair<StrainSkill, List<double>> kvp in strain)
-                {
-                    Console.WriteLine(kvp.Key.GetType().Name);
-                    foreach (double d in kvp.Value)
-                    {
-                        Console.WriteLine(d);
-                    }
-                }
-        
+                strainValues = strain;
+
                 return ErrorCode.Success;
             }
             catch (Exception ex)

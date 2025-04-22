@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -50,11 +51,28 @@ namespace osu.Native.Bindings
             return starRating;
         }
         
-        public void ComputeStrain(LazerBeatmap beatmap, int rulesetId)
+        public unsafe Dictionary<string, double[]> ComputeStrain(LazerBeatmap beatmap, int rulesetId)
         {
-            ErrorCode code = Native.ComputeStrain(beatmap.Handle, rulesetId);
+            ErrorCode code = Native.ComputeStrain(beatmap.Handle, rulesetId, out StrainEntry* entryPtr, out int entryCount);
             if (code != ErrorCode.Success)
                 throw new LazerNativeException(code);
+            
+            Dictionary<string, double[]> strains = new(entryCount);
+
+            for (int i = 0; i < entryCount; i++)
+            {
+                StrainEntry entry = entryPtr[i];
+                double[] values = new double[entry.ValueCount];
+                
+                Marshal.Copy(entry.Values, values, 0, entry.ValueCount);
+                strains.Add(Marshal.PtrToStringUni(entry.SkillType)!, values);
+            }
+
+            code = Native.FreeStrainEntries(entryPtr, entryCount);
+            if (code != ErrorCode.Success)
+                throw new LazerNativeException(code);
+
+            return strains;
         }
     }
 }

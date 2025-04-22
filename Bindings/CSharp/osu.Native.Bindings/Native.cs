@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace osu.Native.Bindings
 {
-    internal class Native
+    internal static unsafe class Native
     {
 #if NETFRAMEWORK
         private const string lib_name = "osu.Native.dll";
@@ -27,7 +27,10 @@ namespace osu.Native.Bindings
         public static extern ErrorCode ComputeDifficulty(int beatmapHandle, int rulesetId, uint mods, out double starRating);
         
         [DllImport(lib_name, EntryPoint = "ComputeStrain")]
-        public static extern ErrorCode ComputeStrain(int beatmapHandle, int rulesetId);
+        public static extern ErrorCode ComputeStrain(int beatmapHandle, int rulesetId, out StrainEntry* entryPtr, out int entryCount);
+        
+        [DllImport(lib_name, EntryPoint = "FreeStrainEntries")]
+        public static extern ErrorCode FreeStrainEntries(StrainEntry* entryPtr, int entryCount);
 
         [DllImport(lib_name, EntryPoint = "SetLogger")]
         public static extern ErrorCode SetLogger(IntPtr logger);
