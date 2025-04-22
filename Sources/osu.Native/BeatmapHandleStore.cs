@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Threading;
 using osu.Game.Beatmaps;
@@ -7,7 +8,7 @@ namespace osu.Native;
 
 internal class BeatmapHandleStore
 {
-    private readonly Dictionary<int, WorkingBeatmap> _store = new();
+    private readonly ConcurrentDictionary<int, WorkingBeatmap> _store = new();
     private int _idIncrement = 1;
 
     public int Store(WorkingBeatmap beatmap)
@@ -21,6 +22,5 @@ internal class BeatmapHandleStore
     public WorkingBeatmap? Get(int id) => _store.GetValueOrDefault(id);
 
     public bool Has(int id) => _store.ContainsKey(id);
-    public bool Has(WorkingBeatmap map) => _store.ContainsValue(map);
-    public void Release(int id) => _store.Remove(id);
+    public void Release(int id) => _store.Remove(id, out _);
 }
