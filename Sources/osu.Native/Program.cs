@@ -172,6 +172,10 @@ namespace osu.Native
                 int id = Handles.Store(workingBeatmap);
                 *beatmapHandle = id;
             }
+            catch (OperationCanceledException ex)
+            {
+                return Error(ErrorCode.Timeout, ex.ToString());
+            }
             catch (Exception ex)
             {
                 return Error(ErrorCode.Failure, ex.ToString());
@@ -188,10 +192,14 @@ namespace osu.Native
                 Mod[] rulesetMods = ruleset.ConvertFromLegacyMods((LegacyMods)mods).ToArray();
 
                 *starRating = ruleset.CreateDifficultyCalculator(workingBeatmap)
-                                     .Calculate(rulesetMods)
-                                     .StarRating;
+                    .Calculate(rulesetMods)
+                    .StarRating;
 
                 return ErrorCode.Success;
+            }
+            catch (OperationCanceledException ex)
+            {
+                return Error(ErrorCode.Timeout, ex.ToString());
             }
             catch (Exception ex)
             {
@@ -214,6 +222,10 @@ namespace osu.Native
                 strainValues = strain;
 
                 return ErrorCode.Success;
+            }
+            catch (OperationCanceledException ex)
+            {
+                return Error(ErrorCode.Timeout, ex.ToString());
             }
             catch (Exception ex)
             {

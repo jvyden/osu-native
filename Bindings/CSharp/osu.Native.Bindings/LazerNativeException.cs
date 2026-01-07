@@ -20,6 +20,7 @@ namespace osu.Native.Bindings
                 ErrorCode.BadBeatmapHandle => "The handle passed was invalid or missing.",
                 ErrorCode.InvalidRuleset => "The ruleset does not support this operation.",
                 ErrorCode.Failure => "An unknown failure occurred. Check the log for more details.",
+                ErrorCode.Timeout => "The calculation took too long and timed out.",
                 _ => $"Unknown error code {code.ToString()}. Check the log for more details."
             };
         }

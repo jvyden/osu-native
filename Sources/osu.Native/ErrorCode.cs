@@ -10,5 +10,6 @@ public enum ErrorCode : byte
     FileReadError = 2,
     BadBeatmapHandle = 3,
     InvalidRuleset = 4,
+    Timeout = 5,
     Failure = 255
 }
